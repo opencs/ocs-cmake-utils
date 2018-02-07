@@ -3,9 +3,11 @@ project (cmake-tools)
 
 # Including the global modules
 set(MSVC_STATIC_CRT 1)
-include("cmake/MSVCCRT.cmake")
-include("cmake/Botan2.cmake")
-include("cmake/GTest.cmake")
+include("../cmake/MSVCCRT.cmake")
+include("../cmake/Botan2.cmake")
+
+set(GTEST_VERBOSE 1)
+include("../cmake/GTest.cmake")
 
 # Threads
 find_package(Threads)
