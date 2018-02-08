@@ -84,10 +84,12 @@ endif()
 if (DEFINED GTEST_HOME)
 	find_path(GTEST_INCLUDE_DIR
 		gtest/gtest.h
-		HINTS "${GTEST_HOME}")
+		HINTS "${GTEST_HOME}"
+		PATH_SUFFIXES include)
 	find_path(GMOCK_INCLUDE_DIR
 		gmock/gmock.h
-		HINTS "${GTEST_HOME}")
+		HINTS "${GTEST_HOME}"
+		PATH_SUFFIXES include)
 else()
 	find_path(GTEST_INCLUDE_DIR
 		gtest/gtest.h)
@@ -96,8 +98,13 @@ else()
 endif()
 
 if (NOT GTEST_INCLUDE_DIR)
-	return()
+	message(WARNING "GTest include directory not found.")
 endif()
+if (NOT GMOCK_INCLUDE_DIR)
+	message(WARNING "GMock include directory not found.")
+endif()
+
+find_package(Threads REQUIRED)
 
 if (WIN32)
 	# Determine the platform
@@ -117,12 +124,13 @@ if (WIN32)
 	
 	set(_GTEST_LIB_DIR "lib/${WIN32_TARGET_PLATFORM}/${MSVC_CRT_FLAG}")	
 	foreach(_gtest_lib_title IN ITEMS GTEST GTEST_MAIN GMOCK GMOCK_MAIN)
+		string(TOLOWER "${_gtest_lib_title}.lib" _gtest_lib_file)
 		find_library(${_gtest_lib_title}_LIB
-			$<LOWER_CASE:${_gtest_lib_title}>.lib 
+			${_gtest_lib_file} 
 			PATHS "${GTEST_HOME}"
 			PATH_SUFFIXES "${_GTEST_LIB_DIR}")
 		find_library(${_gtest_lib_title}D_LIB
-			$<LOWER_CASE:${_gtest_lib_title}>.lib 
+			${_gtest_lib_file} 
 			PATHS "${GTEST_HOME}"
 			PATH_SUFFIXES "${_GTEST_LIB_DIR}D")
 	endforeach(_gtest_lib_title)
@@ -134,7 +142,6 @@ else()
 		set(${_gtest_lib_title}D_LIB ${_gtest_lib_file})
 	endforeach(_gtest_lib_title)
 	# On Linux, it will require threads
-	find_package(Threads)
 endif()
 
 if (GTEST_INCLUDE_DIR)
@@ -228,8 +235,3 @@ if (GMOCK_INCLUDE_DIR)
 	endif()
 	set(GMOCK_FOUND 1)
 endif()
-
-foreach(_gtest_lib_title IN ITEMS GTEST GTEST_MAIN GMOCK GMOCK_MAIN)
-	message(STATUS "${_gtest_lib_title}_LIB")
-endforeach(_gtest_lib_title)
-
