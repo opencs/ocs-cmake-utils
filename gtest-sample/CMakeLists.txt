@@ -11,6 +11,10 @@ include("../cmake/GTest.cmake")
 add_executable(gtest-sample
 	src/dummytest.cpp)
 
+target_include_directories(gtest-sample
+	PUBLIC $<TARGET_PROPERTY:GTest,INTERFACE_INCLUDE_DIRECTORIES>
+)
+
 target_link_libraries(gtest-sample
 	GTest
 	GTest::Main)
