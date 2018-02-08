@@ -11,23 +11,55 @@ a few issues with 3rd party libraries.
 This script can be used to build the *Google Test*
 (https://github.com/google/googletest) under Windows using
 *Microsoft Visual Studio 2017* and create a package suitable to be used with
-CMake's FindGTest module.
+ocs-cmake-utils GTest.cmake module.
+
+The ocs-cmake-utils GTest.cmake differs from the FindGTest from CMake by 
+allowing the selection of the proper binaries while using MSVC (32/64 bits 
+and compiler flags /MT, /MTd, /MD and MDd). Furthermore, it also includes
+support for Google Mock as well.
 
 ## Precompiled libraries
 
 A precompiled version of this library can be found at:
 
-	*  https://otrs.mtrusted.com/downloads/opensource/googletest/gtest-1.8.0-msvc14.7z
+	*  https://otrs.mtrusted.com/downloads/opensource/googletest/gtest-1.8.0-msvc14-20180208.7z
 
-The **sha512sum** of this file is:
+The **sha256sum** of this file is:
 
 ```
-b58b56f6a309e05e647231530e67777dfc4a73ff9a18840e7559de8124aa4aee485040a593e5415b350a5db7f94ecf8fa6d466ca38c42a9fbf6dd7f0ca7e6748
+d29903d7f79eec0f53a0c319a6153ceab7da4ea4562f3c5a6a44c2746b109903
 ```
 
 Move the directory ``gtest`` inside the package to any location of your computer
 (e.g.: ``c:\libs\gtest``) and set the environment variable ``GTEST_ROOT`` to the
 proper value (e.g.: ``set GTEST_ROOT=c:\libs\gtest``).
+
+## Directory structure
+
+Under the directory ``gtest``, this build will contain two directories:
+
+	* include (include files)
+	* lib (libraries for MSVC)
+
+Inside ``lib``, it will have 2 subdirectories that represents the platforms:
+
+	* x86 (for 32-bit libraries)
+	* x64 (for 64-bit libraries)
+
+Inside each the directories x86 and x64, the following directories will be
+available:
+
+	* mt (Multi-Thread)
+	* mtd (Multi-Thread Debug)
+	* md (Multi-Thread DLL)
+	* mdd (Multi-Thread DLL Debug)
+
+Each of those directories will contain the following libraries:
+
+	* gmock.lib
+	* gmock_main.lib
+	* gtest.lib
+	* gtest_main.lib
 
 ## Dependencies
 
@@ -59,33 +91,6 @@ desired location inside your computer and set the environment variable
 For example, if the binaries are copied to ``C:\libs\gtest``, set the variable
 ``GTEST_ROOT`` to ``C:\lib\gtest``. Once this is done, the FindGTest module of
 **CMake** will locate the **Google Test** for you.
-
-## Directory structure
-
-Under the directory ``gtest``, this build will contain two directories:
-
-	* include (include files)
-	* lib (libraries for MSVC)
-
-Inside ``msvc``, it will have 2 subdirectories that represents the platforms:
-
-	* x86 (for 32-bit libraries)
-	* x64 (for 64-bit libraries)
-
-Inside each the directories x86 and x64, the following directories will be
-available:
-
-	* MT (Multi-Thread)
-	* MTD (Multi-Thread Debug)
-	* MD (Multi-Thread DLL)
-	* MDD (Multi-Thread DLL Debug)
-
-Each of those directories will contain the following libraries:
-
-	* gmock.lib
-	* gmock_main.lib
-	* gtest.lib
-	* gtest_main.lib
 
 ## Known limitations
 
