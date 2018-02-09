@@ -23,6 +23,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+# ==============================================================================
 # This module locates the GTest and GMock libraries from Google. It replaces
 # the FindGTest module included with CMake.
 #
@@ -107,21 +108,6 @@ endif()
 find_package(Threads REQUIRED)
 
 if (WIN32)
-	# Determine the platform
-	if (MSVC)
-		if(CMAKE_FORCE_WIN64)
-			set(WIN32_TARGET_PLATFORM "x64")
-		else()
-			set(WIN32_TARGET_PLATFORM "x86")
-		endif()
-	else()
-		if(CMAKE_CL_64)
-			set(WIN32_TARGET_PLATFORM "x64")
-		else()
-			set(WIN32_TARGET_PLATFORM "x86")
-		endif()
-	endif()
-	
 	set(_GTEST_LIB_DIR "lib/${WIN32_TARGET_PLATFORM}/${MSVC_CRT_FLAG}")	
 	foreach(_gtest_lib_title IN ITEMS GTEST GTEST_MAIN GMOCK GMOCK_MAIN)
 		string(TOLOWER "${_gtest_lib_title}.lib" _gtest_lib_file)
