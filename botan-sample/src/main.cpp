@@ -51,7 +51,7 @@ int main(int argc, char ** argv) {
 
 	Botan::SHA_256 hash;
 	hash.final((std::uint8_t *)out);
-	
+	ToHex(out, sizeof(out), hex);
 	std::cout << hex << "\n";
 	return 0;
 }
