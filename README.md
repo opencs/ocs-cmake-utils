@@ -20,8 +20,9 @@ The structure of this package is as follows:
   * cmake: The home of the CMake scripts;
   * deps: Instructions about how to build and create the
     binary packages on Windows;
-  * <name>-sample: A small CMake project that can be as examples
-    about how modules are used;
+  * botan-sample: Sample project with Botan 2;
+  * gtest-sample: Sample project with GoogleTest;
+  * jni-sample: Sample project with Java JNI;
 
 ## The modules
 
@@ -32,7 +33,9 @@ headers and libraries.
 
 ### GTest.cmake
 
-This module allows the discovery of the Java JNI headers and libraries.
+This module allows the discovery of the GoogleTest and GoogleMock (https://github.com/google/googletest)
+headers and libraries. It is somehow similar to FindGTest from CMake but allows the selection of
+distinct platforms and compilation flags under MSVC.
 
 ### JNI.cmake
 
