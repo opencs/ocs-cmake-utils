@@ -1,5 +1,5 @@
 # gtest-win-build
-Copyright (c) 2017-2018 Open Communications Security. All rights reserved.
+Copyright (c) 2017-2019 Open Communications Security. All rights reserved.
 
 ## Introduction
 
@@ -10,29 +10,13 @@ a few issues with 3rd party libraries.
 
 This script can be used to build the *Google Test*
 (https://github.com/google/googletest) under Windows using
-*Microsoft Visual Studio 2017* and create a package suitable to be used with
+*Microsoft Visual Studio 2019* and create a package suitable to be used with
 ocs-cmake-utils GTest.cmake module.
 
 The ocs-cmake-utils GTest.cmake differs from the FindGTest from CMake by 
 allowing the selection of the proper binaries while using MSVC (32/64 bits 
 and compiler flags /MT, /MTd, /MD and MDd). Furthermore, it also includes
 support for Google Mock as well.
-
-## Precompiled libraries
-
-A precompiled version of this library can be found at:
-
-	*  https://otrs.mtrusted.com/downloads/opensource/googletest/gtest-1.8.0-msvc14-20180208.7z
-
-The **sha256sum** of this file is:
-
-```
-d29903d7f79eec0f53a0c319a6153ceab7da4ea4562f3c5a6a44c2746b109903
-```
-
-Move the directory ``gtest`` inside the package to any location of your computer
-(e.g.: ``c:\libs\gtest``) and set the environment variable ``GTEST_ROOT`` to the
-proper value (e.g.: ``set GTEST_ROOT=c:\libs\gtest``).
 
 ## Directory structure
 
@@ -56,20 +40,20 @@ available:
 
 Each of those directories will contain the following libraries:
 
-	* gmock.lib
-	* gmock_main.lib
-	* gtest.lib
-	* gtest_main.lib
+	* gmock*.lib
+	* gmock_main*.lib
+	* gtest*.lib
+	* gtest_main*.lib
 
 ## Dependencies
 
 This build script requires the following dependencies in order to be executed:
 
 	* Microsoft Windows 10;
-	* Visual Studio 2017 with C/C++ support (any edition);
-	* CMake 2.9 or later;
+	* Visual Studio 2019 with C/C++ support (any edition);
+	* CMake 3.16.x or later;
 	* Apache Ant 1.9 or later;
-	* A Java 8 Virtual Machine (for Ant);
+	* A Java 8 Virtual Machine (used bt Ant);
 
 ## Running the build
 
@@ -84,7 +68,7 @@ be located in the layout expected by the CMake's FindGTest module.
 
 ## Installation
 
-Once the package is complete, copy the directory <project-home>/gtest to the
+Once the package is complete, copy the directory &lt;project-home&gt;/gtest to the
 desired location inside your computer and set the environment variable
 ``GTEST_ROOT`` to point to this location.
 

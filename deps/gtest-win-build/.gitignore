@@ -1,4 +1,4 @@
-gtest*.zip
-bin
-gtest
-src
+*.zip
+/build
+/gtest
+
