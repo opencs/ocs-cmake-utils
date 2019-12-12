@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2018, Open Communications Security
+# Copyright (c) 2017-2019, Open Communications Security
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,7 @@
 # This method depends on MSVCCRT from OpenCS in order to work properly.
 #
 # History:
+#    - 2019.12.12: Support to the new structure of Release/Debug libraries;
 #    - 2018.02.14: Support to "-dbg" libraries on Linux added;
 #
 # Known limitations:
@@ -112,16 +113,18 @@ find_package(Threads REQUIRED)
 
 if (WIN32)
 	set(_GTEST_LIB_DIR "lib/${WIN32_TARGET_PLATFORM}/${MSVC_CRT_FLAG}")	
+	gtest_log("_GTEST_LIB_DIR=${_GTEST_LIB_DIR}")
 	foreach(_gtest_lib_title IN ITEMS GTEST GTEST_MAIN GMOCK GMOCK_MAIN)
 		string(TOLOWER "${_gtest_lib_title}.lib" _gtest_lib_file)
 		find_library(${_gtest_lib_title}_LIB
 			${_gtest_lib_file} 
 			PATHS "${GTEST_HOME}"
-			PATH_SUFFIXES "${_GTEST_LIB_DIR}")
+			PATH_SUFFIXES "${_GTEST_LIB_DIR}/Release")
+		string(TOLOWER "${_gtest_lib_title}d.lib" _gtest_lib_file)			
 		find_library(${_gtest_lib_title}D_LIB
 			${_gtest_lib_file} 
 			PATHS "${GTEST_HOME}"
-			PATH_SUFFIXES "${_GTEST_LIB_DIR}D")
+			PATH_SUFFIXES "${_GTEST_LIB_DIR}/Debug")
 	endforeach(_gtest_lib_title)
 else()
 	foreach(_gtest_lib_title IN ITEMS GTEST GTEST_MAIN GMOCK GMOCK_MAIN)
