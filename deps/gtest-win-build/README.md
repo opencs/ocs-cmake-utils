@@ -34,16 +34,35 @@ Inside each the directories x86 and x64, the following directories will be
 available:
 
 	* mt (Multi-Thread)
-	* mtd (Multi-Thread Debug)
 	* md (Multi-Thread DLL)
-	* mdd (Multi-Thread DLL Debug)
 
-Each of those directories will contain the following libraries:
+Inside each the directories mt and md, the following directories will be
+available:
 
-	* gmock*.lib
-	* gmock_main*.lib
-	* gtest*.lib
-	* gtest_main*.lib
+	* Debug
+	* Release
+
+Inside each the directory Release, the following files will be inside:
+
+	* gmock.lib
+	* gmock.pdb
+	* gmock_main.lib
+	* gmock_main.pdb
+	* gtest.lib
+	* gtest.pdb
+	* gtest_main.lib
+	* gtest_main.pdb
+
+Inside each the directory Debug, the following files will be inside:
+
+	* gmockd.lib
+	* gmockd.pdb
+	* gmock_maind.lib
+	* gmock_maind.pdb
+	* gtestd.lib
+	* gtestd.pdb
+	* gtest_maind.lib
+	* gtest_maind.pdb
 
 ## Dependencies
 

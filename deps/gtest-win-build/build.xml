@@ -101,20 +101,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 			<fileset dir="${build.dir}/${src.dir}/googlemock/include" />
 		</copy>
 		<copy todir="${pack.dir}/lib/x86/mt">
-			<fileset dir="${build.dir}/Win32/bin/Release" />
-			<fileset dir="${build.dir}/Win32/lib/Release" />
-		</copy>
-		<copy todir="${pack.dir}/lib/x86/mtd">
-			<fileset dir="${build.dir}/Win32/bin/Debug" />
-			<fileset dir="${build.dir}/Win32/lib/Debug" />
+			<fileset dir="${build.dir}/Win32/bin" />
+			<fileset dir="${build.dir}/Win32/lib" />
 		</copy>
 		<copy todir="${pack.dir}/lib/x64/mt">
-			<fileset dir="${build.dir}/x64/bin/Release" />
-			<fileset dir="${build.dir}/x64/lib/Release" />
-		</copy>
-		<copy todir="${pack.dir}/lib/x64/mtd">
-			<fileset dir="${build.dir}/x64/bin/Debug" />
-			<fileset dir="${build.dir}/x64/lib/Debug" />
+			<fileset dir="${build.dir}/x64/bin" />
+			<fileset dir="${build.dir}/x64/lib" />
 		</copy>
 	</target>
 </project>
