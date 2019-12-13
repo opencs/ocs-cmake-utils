@@ -61,26 +61,44 @@ if (WIN32)
 		endif()
 		if (MSVC_STATIC_CRT)
 			set(MSVC_CRT_FLAG "MT")
-			foreach(lang C CXX)
-				foreach (flag_var
-						CMAKE_${lang}_FLAGS
-						CMAKE_${lang}_FLAGS_DEBUG
-						CMAKE_${lang}_FLAGS_DEBUG_INIT
-						CMAKE_${lang}_FLAGS_INIT
-						CMAKE_${lang}_FLAGS_MINSIZEREL
-						CMAKE_${lang}_FLAGS_MINSIZEREL_INIT
-						CMAKE_${lang}_FLAGS_RELEASE
-						CMAKE_${lang}_FLAGS_RELEASE_INIT
-						CMAKE_${lang}_FLAGS_RELWITHDEBINFO
-						CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT
-						)
-					string(REPLACE "/MDd " "/MTd " ${flag_var} "${${flag_var}}")
-					string(REPLACE "/MD " "/MT " ${flag_var} "${${flag_var}}")
-				endforeach()
-			endforeach()
+			set(MSVC_CRT_FLAG_DISABLED "MD")
 		else()
 			set(MSVC_CRT_FLAG "MD")
+			set(MSVC_CRT_FLAG_DISABLED "MT")
 		endif()
+		
+		# Replace the flags if required
+		foreach(lang C CXX)
+			foreach (flag_var
+					CMAKE_${lang}_FLAGS
+					CMAKE_${lang}_FLAGS_DEBUG
+					CMAKE_${lang}_FLAGS_MINSIZEREL
+					CMAKE_${lang}_FLAGS_RELEASE
+					CMAKE_${lang}_FLAGS_RELWITHDEBINFO
+					)
+				#message(STATUS "${flag_var} = ${${flag_var}}")
+				if ("${flag_var}" MATCHES "DEBUG")
+					set(MSVC_CRT_FLAG_SUFFIX "d")
+				else()
+					set(MSVC_CRT_FLAG_SUFFIX "")
+				endif()
+				set(new_flag "/${MSVC_CRT_FLAG}${MSVC_CRT_FLAG_SUFFIX}")
+				set(old_flag "/${MSVC_CRT_FLAG_DISABLED}${MSVC_CRT_FLAG_SUFFIX}")
+				if (NOT  "${${flag_var}}" MATCHES ".*${new_flag}.*")
+					if ("${${flag_var}}" MATCHES ".*${old_flag}.*")
+						# message(STATUS "Replace")
+						string(REPLACE
+							"${old_flag}"
+							"${new_flag}"
+							${flag_var} "${${flag_var}}")
+					else()
+						# message(STATUS "Append")
+						set(${flag_var} "${new_flag} ${${flag_var}}")
+					endif()
+				endif()
+				# message(STATUS "${flag_var} = ${${flag_var}}")
+			endforeach()
+		endforeach()
 		message(STATUS "MSVC CRT flag: ${MSVC_CRT_FLAG}.")
 	endif()	
 endif()
