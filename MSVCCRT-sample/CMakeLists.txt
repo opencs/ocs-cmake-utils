@@ -8,3 +8,4 @@ include("../cmake/MSVCCRT.cmake")
 add_executable(MSVCCRT-sample
 	src/main.cpp)
 
+MSVCCRT_FixTarget(MSVCCRT-sample)

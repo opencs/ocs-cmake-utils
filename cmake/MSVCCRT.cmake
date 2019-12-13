@@ -60,9 +60,11 @@ if (WIN32)
 			option(MSVC_STATIC_CRT "Instructs the compiler to use the static CRT instead of the dynamic one." 0)
 		endif()
 		if (MSVC_STATIC_CRT)
+			set(MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 			set(MSVC_CRT_FLAG "MT")
 			set(MSVC_CRT_FLAG_DISABLED "MD")
 		else()
+			set(MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 			set(MSVC_CRT_FLAG "MD")
 			set(MSVC_CRT_FLAG_DISABLED "MT")
 		endif()
@@ -102,3 +104,17 @@ if (WIN32)
 		message(STATUS "MSVC CRT flag: ${MSVC_CRT_FLAG}.")
 	endif()	
 endif()
+
+################################################################################ 
+# This function sets the MSVCCRT runtime for each target in the project.
+# It is necessary when the default flags added by this module are not respected
+# by the generator.
+#
+# Parameters:
+#	target: The name of the target.
+function(MSVCCRT_FixTarget target)
+	if (MSVC)
+		set_property(TARGET ${target} PROPERTY
+				MSVC_RUNTIME_LIBRARY "${MSVC_RUNTIME_LIBRARY}")
+	endif()
+endfunction(MSVCCRT_FixTarget)
