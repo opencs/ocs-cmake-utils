@@ -52,119 +52,142 @@ SET(__OPENCS_JNI 1)
 
 function(jni_log _msg)
 	if (JNI_VERBOSE)
-		message(STATUS ${_msg})
+		message(STATUS "[JNI] ${_msg}")
 	endif()
 endfunction()
 
-if(WIN32)
-	# Locate the appropriate Java Home
-	if (CMAKE_FORCE_WIN64)
+if (JAVA_HOME)
+	# JAVA_HOME is set. Nothing to do...
+	jni_log("Using predefined JAVA_HOME '${JAVA_HOME}'.")
+else()
+	if(WIN32)
+		# Locate the appropriate Java Home
+		if (CMAKE_FORCE_WIN64)
+			if (JAVA_HOME64)
+				SET(JAVA_HOME "${JAVA_HOME64}")
+			elseif(NOT "$ENV{JAVA_HOME64}" STREQUAL "")
+				SET(JAVA_HOME "$ENV{JAVA_HOME64}")
+			else()
+				jni_log("The JAVA_HOME64 environment variable is not defined.")	
+			endif()
+		else()
+			if (JAVA_HOME32)
+				SET(JAVA_HOME "${JAVA_HOME32}")
+			elseif(NOT "$ENV{JAVA_HOME32}" STREQUAL "")
+				SET(JAVA_HOME "$ENV{JAVA_HOME32}")
+			else()
+				jni_log("The JAVA_HOME32 environment variable is not defined.")	
+			endif()
+		endif()
+		# Use the system default if necessary
+		if(NOT JAVA_HOME)
+			if(NOT "$ENV{JAVA_HOME}" STREQUAL "")
+				SET(JAVA_HOME "$ENV{JAVA_HOME}")
+			else()
+				message(FATAL_ERROR "The location of JAVA could not be determined. Set JAVA_HOME64, JAVA_HOME32 or JAVA_HOME environment variables and try again.")
+			endif()
+		endif()
+		jni_log("JAVA_HOME is ${JAVA_HOME}")
+
+	else()
+		# Linux and others
 		if (JAVA_HOME64)
 			SET(JAVA_HOME "${JAVA_HOME64}")
-		elseif(NOT "$ENV{JAVA_HOME64}" STREQUAL "")
-			SET(JAVA_HOME "$ENV{JAVA_HOME64}")
+			jni_log("Using JAVA_HOME '${JAVA_HOME}' from JAVA_HOME64.")
+		elseif(JAVA_HOME32)
+			SET(JAVA_HOME "${JAVA_HOME64}")
+			jni_log("Using JAVA_HOME '${JAVA_HOME}' from JAVA_HOME32.")
 		else()
-			jni_log("The JAVA_HOME64 environment variable is not defined.")	
+			if(NOT "$ENV{JAVA_HOME}" STREQUAL "")
+				SET(JAVA_HOME "$ENV{JAVA_HOME}")
+				jni_log("Using JAVA_HOME '${JAVA_HOME}' from environment.")
+			else()
+				message(STATUS "The location of JAVA could not be determined.")
+			endif()
 		endif()
-	else()
-		if (JAVA_HOME32)
-			SET(JAVA_HOME "${JAVA_HOME32}")
-		elseif(NOT "$ENV{JAVA_HOME32}" STREQUAL "")
-			SET(JAVA_HOME "$ENV{JAVA_HOME32}")
-		else()
-			jni_log("The JAVA_HOME32 environment variable is not defined.")	
-		endif()
-	endif()
-	# Use the system default if necessary
-	if(NOT JAVA_HOME)
-		if(NOT "$ENV{JAVA_HOME}" STREQUAL "")
-			SET(JAVA_HOME "$ENV{JAVA_HOME}")
-		else()
-			message(FATAL_ERROR "The location of JAVA could not be determined. Set JAVA_HOME64, JAVA_HOME32 or JAVA_HOME environment variables and try again.")
-		endif()
-	endif()
-	jni_log("JAVA_HOME is ${JAVA_HOME}")
-	SET(JNI_PLATFORM "win32")
-else()
-	# Linux and others
-	if(NOT "$ENV{JAVA_HOME}" STREQUAL "")
-		SET(JAVA_HOME "$ENV{JAVA_HOME}")
-	else()
-		message(FATAL_ERROR "The location of JAVA could not be determined. Set JAVA_HOME environment variables and try again.")
-	endif()
-
-	if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-		set(JNI_PLATFORM "linux")
-	else()
-		message(FATAL_ERROR "${CMAKE_SYSTEM_NAME} is not supported yet.")
 	endif()
 endif()
+
+# Platform
+if(WIN32)
+	SET(JNI_PLATFORM "win32")
+elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+	set(JNI_PLATFORM "linux")
+else()
+	message(FATAL_ERROR "${CMAKE_SYSTEM_NAME} is not supported yet.")
+endif()
+
 
 # Find the headers
 find_path(JNI_INCLUDE_DIR jni.h
 	PATHS "${JAVA_HOME}"
 	PATH_SUFFIXES "include")
-if(NOT JNI_INCLUDE_DIR)
-	message(FATAL_ERROR "'${JAVA_HOME}' does not point to a valid JDK.")
-endif()
 
 find_path(JNI_INCLUDE_PLATFORM_DIR jni_md.h
 	PATHS "${JNI_INCLUDE_DIR}"
 	PATH_SUFFIXES "${JNI_PLATFORM}")
-if(NOT JNI_INCLUDE_PLATFORM_DIR)
-	message(FATAL_ERROR "'${JAVA_HOME}' does not point to a valid JDK.")
-endif()
 
-if(WIN32)
-	foreach(_jni_lib_title IN ITEMS JAWT JVM)
-		string(TOLOWER "${_jni_lib_title}.lib" _jni_lib_file)
-		find_library(JNI_${_jni_lib_title}_LIB 
-			${_jni_lib_file}
-			PATHS "${JAVA_HOME}"
-			PATH_SUFFIXES "lib")
-	endforeach()
+if((JNI_INCLUDE_DIR) AND (JNI_INCLUDE_PLATFORM_DIR))
+	if(WIN32)
+		foreach(_jni_lib_title IN ITEMS JVM AWT)
+			string(TOLOWER "${_jni_lib_title}.lib" _jni_lib_file)
+			find_library(JNI_${_jni_lib_title}_LIB 
+				${_jni_lib_file}
+				PATHS "${JAVA_HOME}"
+				PATH_SUFFIXES "lib")
+		endforeach()
+	else()
+		foreach(_jni_lib_title IN ITEMS JVM AWT)
+			string(TOLOWER "lib${_jni_lib_title}.so" _jni_lib_file)
+			find_library(JNI_${_jni_lib_title}_LIB 
+				${_jni_lib_file}
+				PATHS "${JAVA_HOME}"
+				PATH_SUFFIXES "lib" "lib/server")
+		endforeach()
+	endif()
+	if(NOT TARGET JNI)
+		add_library(JNI UNKNOWN IMPORTED)
+		set_target_properties(JNI PROPERTIES
+			INTERFACE_INCLUDE_DIRECTORIES "${JNI_INCLUDE_DIR}")
+		set_property(TARGET JNI APPEND PROPERTY
+			INTERFACE_INCLUDE_DIRECTORIES "${JNI_INCLUDE_PLATFORM_DIR}")
+	endif()
+
+	if(JNI_JVM_LIB)
+		set(JNI_JVM_FOUND 1)
+		if(NOT TARGET JNI::JVM)
+			add_library(JNI::JVM UNKNOWN IMPORTED)
+			set_target_properties(JNI::JVM PROPERTIES
+				INTERFACE_INCLUDE_DIRECTORIES "${JNI_INCLUDE_DIR}")
+			set_property(TARGET JNI::JVM APPEND PROPERTY
+				INTERFACE_INCLUDE_DIRECTORIES "${JNI_INCLUDE_PLATFORM_DIR}")
+			set_target_properties(JNI::JVM PROPERTIES
+				IMPORTED_LOCATION "${JNI_JVM_LIB}")
+		endif()
+	endif()
+
+	if(JNI_AWT_LIB)
+		set(JNI_AWT_FOUND 1)
+		if(NOT TARGET JNI::AWT)
+			add_library(JNI::AWT UNKNOWN IMPORTED)
+			set_target_properties(JNI::AWT PROPERTIES
+				INTERFACE_INCLUDE_DIRECTORIES "${JNI_INCLUDE_DIR}")
+			set_property(TARGET JNI::AWT APPEND PROPERTY
+				INTERFACE_INCLUDE_DIRECTORIES "${JNI_INCLUDE_PLATFORM_DIR}")
+			set_target_properties(JNI::AWT PROPERTIES
+				IMPORTED_LOCATION "${JNI_AWT_LIB}")
+		endif()
+	endif()
+	set(JNI_FOUND 1)
 else()
-	foreach(_jni_lib_title IN ITEMS JAWT JVM)
-		string(TOLOWER "lib${_jni_lib_title}.so" _jni_lib_file)
-		find_library(JNI_${_jni_lib_title}_LIB 
-			${_jni_lib_file}
-			PATHS "${JAVA_HOME}"
-			PATH_SUFFIXES "lib")
-	endforeach()
+	message(STATUS "'${JAVA_HOME}' does not point to a valid JDK.")
+	set(JNI_FOUND 0)
 endif()
 
-set(JNI_FOUND 1)
-if(NOT TARGET JNI)
-	add_library(JNI UNKNOWN IMPORTED)
-	set_target_properties(JNI PROPERTIES
-		INTERFACE_INCLUDE_DIRECTORIES "${JNI_INCLUDE_DIR}")
-	set_property(TARGET JNI APPEND PROPERTY
-		INTERFACE_INCLUDE_DIRECTORIES "${JNI_INCLUDE_PLATFORM_DIR}")
-endif()
+#jni_log("JNI_JAVA_LIB=${JNI_JAVA_LIB}")
+#jni_log("JNI_PLATFORM=${JNI_PLATFORM}")
+#jni_log("JNI_INCLUDE_DIR=${JNI_INCLUDE_DIR}")
+#jni_log("JNI_INCLUDE_PLATFORM_DIR=${JNI_INCLUDE_PLATFORM_DIR}")
+#jni_log("JNI_INCLUDE_PLATFORM_DIR=${JNI_INCLUDE_PLATFORM_DIR}")
 
-if(JNI_JVM_LIB)
-	set(JNI_JVM_FOUND 1)
-	if(NOT TARGET JNI::JVM)
-		add_library(JNI::JVM UNKNOWN IMPORTED)
-		set_target_properties(JNI::JVM PROPERTIES
-			INTERFACE_INCLUDE_DIRECTORIES "${JNI_INCLUDE_DIR}")
-		set_property(TARGET JNI::JVM APPEND PROPERTY
-			INTERFACE_INCLUDE_DIRECTORIES "${JNI_INCLUDE_PLATFORM_DIR}")
-		set_target_properties(JNI::JVM PROPERTIES
-			IMPORTED_LOCATION "${JNI_JVM_LIB}")
-	endif()
-endif()
-
-if(JNI_AWT_LIB)
-	set(JNI_AWT_FOUND 1)
-	if(NOT TARGET JNI::AWT)
-		add_library(JNI::AWT UNKNOWN IMPORTED)
-		set_target_properties(JNI::AWT PROPERTIES
-			INTERFACE_INCLUDE_DIRECTORIES "${JNI_INCLUDE_DIR}")
-		set_property(TARGET JNI::AWT APPEND PROPERTY
-			INTERFACE_INCLUDE_DIRECTORIES "${JNI_INCLUDE_PLATFORM_DIR}")
-		set_target_properties(JNI::AWT PROPERTIES
-			IMPORTED_LOCATION "${JNI_AWT_LIB}")
-	endif()
-endif()
 

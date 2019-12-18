@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.9)
 project (gtest-sample)
 
 # Including the global modules
-set(MSVC_STATIC_CRT 1)
+$<TARGET_PROPERTY:GTest,INTERFACE_INCLUDE_DIRECTORIES>
 include("../cmake/MSVCCRT.cmake")
 
 set(GTEST_VERBOSE 1)
