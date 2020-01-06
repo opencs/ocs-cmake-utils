@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	<property name="build.dir" value="${src.dir}/bin" />
 	<property name="pack.dir" value="gtest" />
 	
-	<target name="all" depends="download,build,pack"/>
+	<target name="all" depends="download,unpack-source,build,pack"/>
 	
 	<target name="download" description="Downloads the source package from github">
 		<get src="${gtest.url}" dest="${gtest.file}" skipexisting="true"/>
